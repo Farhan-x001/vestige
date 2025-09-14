@@ -22,6 +22,7 @@ const formSchema = z.object({
 
 export default function ApplyPage() {
   const [loading, setLoading] = useState(false);
+  const [imageProcessing, setImageProcessing] = useState(false);
   const router = useRouter();
 
   const form = useForm({
@@ -40,15 +41,20 @@ export default function ApplyPage() {
     console.log('Application submitted:', values);
 
     try {
+      // Validate photo size before sending
+      if (values.photo && values.photo.length > 10000000) { // 10MB limit
+        throw new Error('Photo is too large. Please use an image smaller than 5MB.');
+      }
+
       // API call to Node.js backend
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/api/applications`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://vestiga-backend-node.onrender.com'}/api/applications`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
@@ -161,9 +167,32 @@ export default function ApplyPage() {
                       onChange={(event) => {
                         const file = event.target.files?.[0];
                         if (file) {
+                          // Check file size (5MB limit)
+                          const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+                          if (file.size > maxSize) {
+                            alert('File size must be less than 5MB');
+                            event.target.value = ''; // Clear the input
+                            return;
+                          }
+                          
+                          setImageProcessing(true);
                           const reader = new FileReader();
                           reader.onloadend = () => {
-                            onChange(reader.result); // Send Base64 string
+                            try {
+                              onChange(reader.result); // Send Base64 string
+                              setImageProcessing(false);
+                            } catch (error) {
+                              console.error('Error processing image:', error);
+                              alert('Error processing image. Please try a different file.');
+                              event.target.value = ''; // Clear the input
+                              setImageProcessing(false);
+                            }
+                          };
+                          reader.onerror = () => {
+                            console.error('Error reading file');
+                            alert('Error reading file. Please try again.');
+                            event.target.value = ''; // Clear the input
+                            setImageProcessing(false);
                           };
                           reader.readAsDataURL(file);
                         } else {
@@ -173,6 +202,10 @@ export default function ApplyPage() {
                     />
                   </FormControl>
                   <FormMessage />
+                  <p className="text-sm text-gray-500">Maximum file size: 5MB</p>
+                  {imageProcessing && (
+                    <p className="text-sm text-blue-500">Processing image...</p>
+                  )}
                 </FormItem>
               )}
             />
