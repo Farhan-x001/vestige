@@ -28,7 +28,7 @@ function SummaryContent() {
 
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/api/applications/${applicationId}`
+          `${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://vestiga-backend-node.onrender.com'}/api/applications/${applicationId}`
         );
         if (!response.ok) {
           const errorData = await response.json();
