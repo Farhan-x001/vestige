@@ -42,7 +42,7 @@ export default function AddApplicationPage() {
   async function onSubmit(values) {
     setLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/applications`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://vestiga-backend-node.onrender.com'}/api/applications`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
