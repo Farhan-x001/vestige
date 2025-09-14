@@ -5,27 +5,36 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import PolicyContent from '@/components/PolicyContent';
 
 export default function PolicyPage() {
+  // Define opacity and y values to use in variants
+  const opacity = 0;
+  const y = 20;
+
   const containerVariants = {
-    hidden{ opacity },
-    visible{ opacity, transition{ staggerChildren.1 } },
+    hidden: { opacity },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
+  };
+
+  const itemVariants = {
+    hidden: { opacity, y },
+    visible: { opacity: 1, y: 0 },
   };
 
   const sectionContent = [
     {
-      title"Privacy Policy",
-      content"Your privacy is important to us. This policy explains how we collect, use, and protect your personal data. We are committed to ensuring the confidentiality and security of the information you provide us.",
+      title: "Privacy Policy",
+      content: "Your privacy is important to us. This policy explains how we collect, use, and protect your personal data. We are committed to ensuring the confidentiality and security of the information you provide us.",
     },
     {
-      title"Terms of Service",
-      content"These terms govern your use of the Vestiga application. By accessing or using our services, you agree to be bound by these terms. Please read them carefully before proceeding.",
+      title: "Terms of Service",
+      content: "These terms govern your use of the Vestiga application. By accessing or using our services, you agree to be bound by these terms. Please read them carefully before proceeding.",
     },
     {
-      title"Refund Policy",
-      content"Our refund policy outlines the conditions under which refunds may be issued. All requests are subject to review and must comply with the criteria specified herein.",
+      title: "Refund Policy",
+      content: "Our refund policy outlines the conditions under which refunds may be issued. All requests are subject to review and must comply with the criteria specified herein.",
     },
     {
-      title"Data Security",
-      content"We employ industry-standard security measures to protect your data from unauthorized access, alteration, disclosure, or destruction. Your trust is paramount, and we strive to maintain the highest level of data integrity.",
+      title: "Data Security",
+      content: "We employ industry-standard security measures to protect your data from unauthorized access, alteration, disclosure, or destruction. Your trust is paramount, and we strive to maintain the highest level of data integrity.",
     },
   ];
 
@@ -43,7 +52,7 @@ export default function PolicyPage() {
         </CardHeader>
         <CardContent className="space-y-8">
           {sectionContent.map((section, index) => (
-            <PolicyContent key={index} title={section.title} content={section.content} />
+            <PolicyContent key={index} title={section.title} content={section.content} variants={itemVariants} />
           ))}
         </CardContent>
       </Card>

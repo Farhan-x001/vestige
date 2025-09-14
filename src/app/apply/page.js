@@ -150,7 +150,7 @@ export default function ApplyPage() {
             <FormField
               control={form.control}
               name="photo"
-              render={({ field: { value, onChange, ...fieldProps } }) => (
+              render={({ field: { onChange, ...fieldProps } }) => (
                 <FormItem>
                   <FormLabel>Photo Upload (Optional)</FormLabel>
                   <FormControl>

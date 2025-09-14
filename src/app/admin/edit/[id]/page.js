@@ -11,17 +11,16 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from 'sonner'; // Import toast
-
+import { toast } from 'sonner';
 
 const formSchema = z.object({
-  name.string().min(2, { message'Name must be at least 2 characters.' }),
-  idNumber.string().min(5, { message'ID Number must be at least 5 characters.' }),
-  address.string().min(10, { message'Address must be at least 10 characters.' }),
-  mobile.string().regex(/^\d{10}$/, { message'Mobile number must be 10 digits.' }),
-  email.string().email({ message'Invalid email address.' }),
-  photo.string().optional(),
-  paymentStatus.string().optional(),
+  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
+  idNumber: z.string().min(5, { message: 'ID Number must be at least 5 characters.' }),
+  address: z.string().min(10, { message: 'Address must be at least 10 characters.' }),
+  mobile: z.string().regex(/^\d{10}$/, { message: 'Mobile number must be 10 digits.' }),
+  email: z.string().email({ message: 'Invalid email address.' }),
+  photo: z.string().optional(),
+  paymentStatus: z.string().optional(),
 });
 
 export default function EditApplicationPage() {
@@ -33,67 +32,70 @@ export default function EditApplicationPage() {
   const { id } = params;
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver(formSchema),
-    defaultValues{
-      name'',
-      idNumber'',
-      address'',
-      mobile'',
-      email'',
-      photo'',
-      paymentStatus'PENDING',
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: '',
+      idNumber: '',
+      address: '',
+      mobile: '',
+      email: '',
+      photo: '',
+      paymentStatus: 'PENDING',
     },
   });
-
-  useEffect(() => {
-    if (id) {
-      fetchApplicationDetails(id as string);
-    }
-  }, [id, fetchApplicationDetails]); // Added fetchApplicationDetails to dependency array
-
   const fetchApplicationDetails = async (applicationId) => {
     setInitialLoading(true);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/applications/${applicationId}`);
       if (!response.ok) {
-        throw new Error(`Failed to fetch application details${response.status}`);
+        throw new Error(`Failed to fetch application details ${response.status}`);
       }
       const data = await response.json();
       form.reset(data); // Pre-fill the form with fetched data
-    } catch (err) { // Changed 'any' to 'unknown'
+      setError(null);
+    } catch (err) {
       console.error('Error fetching application details:', err);
-      setError((err as Error).message || 'Failed to load application details.'); // Safely cast err to Error
+      setError(err.message || 'Failed to load application details.');
     } finally {
       setInitialLoading(false);
     }
   };
+  
+
+  useEffect(() => {
+    if (id) {
+      fetchApplicationDetails(id);
+    }
+  }, [id]);
+  
 
   async function onSubmit(values) {
     setLoading(true);
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/applications/${id}`, {
-        method'PUT',
-        headers{ 'Content-Type''application/json' },
-        body.stringify(values),
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(values),
       });
-
+  
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`HTTP error! status${response.status} - ${errorText}`);
+        throw new Error(`HTTP error! status ${response.status} - ${errorText}`);
       }
-
+  
       const updatedApplication = await response.json();
       form.reset(updatedApplication);
       toast.success('Application updated successfully!');
-      router.push('/admin'); // Redirect back to admin dashboard
-
-    } catch (err) { // Changed 'any' to 'unknown'
+      router.push('/admin');
+  
+    } catch (err) {
       console.error('Error updating application:', err);
-      toast.error((err as Error).message || 'Failed to update application. Please try again.'); // Safely cast err to Error
+      toast.error(err.message || 'Failed to update application. Please try again.');
     } finally {
       setLoading(false);
     }
   }
+  
 
   if (initialLoading) {
     return (
@@ -112,8 +114,10 @@ export default function EditApplicationPage() {
             <CardDescription>{error}</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button onClick={() => fetchApplicationDetails(id as string)}>Retry</Button>
-            <Button variant="outline" className="ml-2" onClick={() => router.push('/admin')}>Back to Admin</Button>
+          <Button onClick={() => fetchApplicationDetails(id)}>Retry</Button>
+          <Button variant="outline" className="ml-2" onClick={() => router.push('/admin')}>
+              Back to Admin
+            </Button>
           </CardContent>
         </Card>
       </div>
@@ -122,8 +126,8 @@ export default function EditApplicationPage() {
 
   return (
     <motion.div
-      initial={{ opacity, y }}
-      animate={{ opacity, y }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8 }}
       className="container mx-auto px-4 py-12"
     >
@@ -203,7 +207,7 @@ export default function EditApplicationPage() {
               <FormField
                 control={form.control}
                 name="photo"
-                render={({ field{ value, onChange, ...fieldProps } }) => (
+                render={({ field: { onChange, ...fieldProps } }) => (
                   <FormItem>
                     <FormLabel>Photo Upload (Optional)</FormLabel>
                     <FormControl>
@@ -216,7 +220,7 @@ export default function EditApplicationPage() {
                           if (file) {
                             const reader = new FileReader();
                             reader.onloadend = () => {
-                              onChange(reader.result as string);
+                              onChange(reader.result);
                             };
                             reader.readAsDataURL(file);
                           } else {
@@ -251,9 +255,8 @@ export default function EditApplicationPage() {
                   </FormItem>
                 )}
               />
-
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Updating...' 'Update Application'}
+                {loading ? 'Updating...' : 'Update Application'}
               </Button>
               <Button type="button" variant="outline" className="w-full mt-2" onClick={() => router.push('/admin')}>
                 Cancel

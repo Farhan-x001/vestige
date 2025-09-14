@@ -5,13 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 
 export default function AboutPage() {
   const containerVariants = {
-    hidden{ opacity },
-    visible{ opacity, transition{ staggerChildren.1 } },
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
   };
 
   const itemVariants = {
-    hidden{ opacity, y },
-    visible{ opacity, y },
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 },
   };
 
   return (

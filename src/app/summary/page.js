@@ -4,10 +4,9 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 
-
-export default function SummaryPage() {
+function SummaryContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const appId = searchParams.get('appId');
@@ -19,6 +18,7 @@ export default function SummaryPage() {
   useEffect(() => {
     if (!appId) {
       setError('Application ID is missing. Please return to the application form.');
+      setLoading(false);
       return;
     }
 
@@ -27,13 +27,15 @@ export default function SummaryPage() {
       setError(null);
 
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/api/applications/${applicationId}`);
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/api/applications/${applicationId}`
+        );
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.message || `Failed to fetch application data: ${response.status}`);
         }
         const result = await response.json();
-        setApplicationData(result.data);
+        setApplicationData(result.data ?? result);
       } catch (err) {
         console.error('Error fetching application data:', err);
         setError(err.message || 'Failed to load application data. Please try again.');
@@ -43,48 +45,15 @@ export default function SummaryPage() {
     };
 
     fetchApplicationData(appId);
-  }, [searchParams]);
+  }, [appId]);
 
-  // const handlePayment = async () => {
-  //   if (!applicationData || !applicationData.appId) {
-  //     setError('Application ID is missing. Cannot initiate payment.');
-  //     return;
-  //   }
-
-  //   setLoadingPayment(true);
-  //   setError(null);
-
-  //   try {
-  //     const paymentDetails = {
-  //       applicationId.appId,
-  //       amount, // Example amount, you might want to make this dynamic
-  //       productInfo'Vestiga Application Fee',
-  //       firstName.name,
-  //       email.email,
-  //     };
-
-  //     const response = await fetch('http://localhost:8080/api/payments/initiate', {
-  //       method'POST',
-  //       headers{
-  //         'Content-Type''application/json',
-  //       },
-  //       body.stringify(paymentDetails),
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error(`HTTP error! status${response.status}`);
-  //     }
-
-  //     const data = await response.json();
-  //     window.location.href = data.paymentUrl; // Redirect to PayU
-
-  //   } catch (err) {
-  //     console.error('Payment initiation failed:', err);
-  //     setError(err.message || 'Failed to initiate payment. Please try again.');
-  //   } finally {
-  //     setLoadingPayment(false);
-  //   }
-  // };
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <p className="text-lg text-gray-600">Loading summary...</p>
+      </div>
+    );
+  }
 
   if (error) {
     return (
@@ -104,14 +73,6 @@ export default function SummaryPage() {
           </CardContent>
         </Card>
       </motion.div>
-    );
-  }
-
-  if (!applicationData) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-lg text-gray-600">Loading summary...</p>
-      </div>
     );
   }
 
@@ -162,16 +123,19 @@ export default function SummaryPage() {
             <p className="text-sm font-medium text-gray-500">Email:</p>
             <p className="text-lg font-semibold text-gray-900">{applicationData.email}</p>
           </div>
-          <Button
-            // onClick={handlePayment}
-            className="w-full mt-6"
-            // disabled={loadingPayment}
-          >
-            {/* {loadingPayment ? 'Processing Payment...' 'Proceed to Pay with PayU'} */}
+          <Button className="w-full mt-6" disabled>
             PayU integration temporarily disabled.
           </Button>
         </CardContent>
       </Card>
     </motion.div>
+  );
+}
+
+export default function SummaryClient() {
+  return (
+    <Suspense fallback={<div className="container mx-auto px-4 py-12 text-center">Loading...</div>}>
+      <SummaryContent />
+    </Suspense>
   );
 }
