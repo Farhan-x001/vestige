@@ -48,7 +48,7 @@ export default function ApplyPage() {
       }
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://vestiga-backend-node.onrender.com'}/api/applications`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://vestiga-backend-node.onrender.com'}api/applications`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
