@@ -33,6 +33,7 @@ export default function ApplyPage() {
       address: '',
       mobile: '',
       email: '',
+      photo: '',
     },
   });
 
