@@ -46,7 +46,7 @@ export default function EditApplicationPage() {
   const fetchApplicationDetails = async (applicationId) => {
     setInitialLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://vestiga-backend-node.onrender.com'}/api/applications/${applicationId}`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'https://vestiga-backend-node.onrender.com'}api/applications/${applicationId}`);
       if (!response.ok) {
         throw new Error(`Failed to fetch application details ${response.status}`);
       }
