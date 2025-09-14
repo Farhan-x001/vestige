@@ -2,15 +2,11 @@
 
 import { motion } from 'framer-motion';
 
-interface PolicyContentProps {
-  title: string;
-  content: string;
-}
 
-export default function PolicyContent({ title, content }: PolicyContentProps) {
+export default function PolicyContent({ title, content }) {
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
+    hidden{ opacity, y },
+    visible{ opacity, y },
   };
 
   return (

@@ -2,19 +2,21 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
-  const toggleMenu = () => {
-    setIsOpen(!isOpen);
-  };
+  const toggleMenu = () => setIsOpen(!isOpen);
 
+  // Animation variants
   const navVariants = {
     hidden: { opacity: 0, y: -20 },
-    visible: { opacity: 1, y: 0, transition: { staggerChildren: 0.1 } },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { staggerChildren: 0.1 },
+    },
   };
 
   const itemVariants = {
@@ -57,15 +59,21 @@ export default function Navbar() {
             </Link>
           </motion.div>
           <motion.div variants={itemVariants}>
-            <Button asChild>
-              <Link href="/apply">Apply Now</Link>
-            </Button>
+            <Link
+              href="/apply"
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            >
+              Apply Now
+            </Link>
           </motion.div>
         </div>
 
         {/* Mobile Menu Button */}
         <div className="md:hidden">
-          <Button variant="ghost" onClick={toggleMenu}>
+          <button
+            onClick={toggleMenu}
+            className="p-2 rounded-md text-gray-700 hover:bg-gray-200 transition"
+          >
             <svg
               className="w-6 h-6"
               fill="none"
@@ -89,7 +97,7 @@ export default function Navbar() {
                 />
               )}
             </svg>
-          </Button>
+          </button>
         </div>
       </div>
 
@@ -104,29 +112,33 @@ export default function Navbar() {
         >
           <motion.div variants={navVariants} className="flex flex-col space-y-2 px-4">
             <motion.div variants={itemVariants}>
-              <Link href="/" className="block py-2 text-gray-600 hover:text-gray-900 transition-colors duration-300" onClick={toggleMenu}>
+              <Link href="/" className="block py-2 text-gray-600 hover:text-gray-900" onClick={toggleMenu}>
                 Home
               </Link>
             </motion.div>
             <motion.div variants={itemVariants}>
-              <Link href="/about" className="block py-2 text-gray-600 hover:text-gray-900 transition-colors duration-300" onClick={toggleMenu}>
+              <Link href="/about" className="block py-2 text-gray-600 hover:text-gray-900" onClick={toggleMenu}>
                 About
               </Link>
             </motion.div>
             <motion.div variants={itemVariants}>
-              <Link href="/policy" className="block py-2 text-gray-600 hover:text-gray-900 transition-colors duration-300" onClick={toggleMenu}>
+              <Link href="/policy" className="block py-2 text-gray-600 hover:text-gray-900" onClick={toggleMenu}>
                 Policy
               </Link>
             </motion.div>
             <motion.div variants={itemVariants}>
-              <Link href="/admin" className="block py-2 text-gray-600 hover:text-gray-900 transition-colors duration-300" onClick={toggleMenu}>
+              <Link href="/admin" className="block py-2 text-gray-600 hover:text-gray-900" onClick={toggleMenu}>
                 Admin
               </Link>
             </motion.div>
             <motion.div variants={itemVariants}>
-              <Button asChild className="w-full">
-                <Link href="/apply" onClick={toggleMenu}>Apply Now</Link>
-              </Button>
+              <Link
+                href="/apply"
+                onClick={toggleMenu}
+                className="block w-full px-4 py-2 bg-blue-600 text-white rounded-lg text-center hover:bg-blue-700 transition"
+              >
+                Apply Now
+              </Link>
             </motion.div>
           </motion.div>
         </motion.div>

@@ -6,7 +6,6 @@ import { z } from 'zod';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -25,7 +24,7 @@ export default function ApplyPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
@@ -36,31 +35,33 @@ export default function ApplyPage() {
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values) {
     setLoading(true);
     console.log('Application submitted:', values);
 
     try {
-      // Simulate API call to backend
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/applications`, {
+      // API call to Node.js backend
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/api/applications`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(values),
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
 
-      // Backend now returns the application ID as a plain string
-      const appId = await response.text();
+      // Backend now returns JSON with success and data fields
+      const result = await response.json();
+      const appId = result.data;
       console.log('Application submitted:', { ...values, appId });
       toast.success('Application submitted successfully!');
 
       // Redirect to the summary page with only the appId
       router.push(`/summary?appId=${appId}`);
 
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error submitting application:', err);
       toast.error(err.message || 'Failed to submit application. Please try again.');
     } finally {
@@ -162,7 +163,7 @@ export default function ApplyPage() {
                         if (file) {
                           const reader = new FileReader();
                           reader.onloadend = () => {
-                            onChange(reader.result as string); // Send Base64 string
+                            onChange(reader.result); // Send Base64 string
                           };
                           reader.readAsDataURL(file);
                         } else {

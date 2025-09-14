@@ -6,26 +6,26 @@ import PolicyContent from '@/components/PolicyContent';
 
 export default function PolicyPage() {
   const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } },
+    hidden{ opacity },
+    visible{ opacity, transition{ staggerChildren.1 } },
   };
 
   const sectionContent = [
     {
-      title: "Privacy Policy",
-      content: "Your privacy is important to us. This policy explains how we collect, use, and protect your personal data. We are committed to ensuring the confidentiality and security of the information you provide us.",
+      title"Privacy Policy",
+      content"Your privacy is important to us. This policy explains how we collect, use, and protect your personal data. We are committed to ensuring the confidentiality and security of the information you provide us.",
     },
     {
-      title: "Terms of Service",
-      content: "These terms govern your use of the Vestiga application. By accessing or using our services, you agree to be bound by these terms. Please read them carefully before proceeding.",
+      title"Terms of Service",
+      content"These terms govern your use of the Vestiga application. By accessing or using our services, you agree to be bound by these terms. Please read them carefully before proceeding.",
     },
     {
-      title: "Refund Policy",
-      content: "Our refund policy outlines the conditions under which refunds may be issued. All requests are subject to review and must comply with the criteria specified herein.",
+      title"Refund Policy",
+      content"Our refund policy outlines the conditions under which refunds may be issued. All requests are subject to review and must comply with the criteria specified herein.",
     },
     {
-      title: "Data Security",
-      content: "We employ industry-standard security measures to protect your data from unauthorized access, alteration, disclosure, or destruction. Your trust is paramount, and we strive to maintain the highest level of data integrity.",
+      title"Data Security",
+      content"We employ industry-standard security measures to protect your data from unauthorized access, alteration, disclosure, or destruction. Your trust is paramount, and we strive to maintain the highest level of data integrity.",
     },
   ];
 

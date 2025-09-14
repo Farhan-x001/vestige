@@ -6,41 +6,43 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useEffect, useState } from 'react';
 
+
 export default function SummaryPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const [applicationData, setApplicationData] = useState<any>(null);
-  const [loadingPayment, setLoadingPayment] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const appId = searchParams.get('appId');
+
+  const [applicationData, setApplicationData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const appId = searchParams.get('appId');
-
     if (!appId) {
       setError('Application ID is missing. Please return to the application form.');
       return;
     }
 
-    const fetchApplicationData = async (applicationId: string) => {
-      setLoadingPayment(true);
+    const fetchApplicationData = async (applicationId) => {
+      setLoading(true);
       setError(null);
 
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/applications/${applicationId}`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/api/applications/${applicationId}`);
         if (!response.ok) {
-          throw new Error(`Failed to fetch application data: ${response.status}`);
+          const errorData = await response.json();
+          throw new Error(errorData.message || `Failed to fetch application data: ${response.status}`);
         }
-        const data = await response.json();
-        setApplicationData(data);
-      } catch (err: any) {
+        const result = await response.json();
+        setApplicationData(result.data);
+      } catch (err) {
         console.error('Error fetching application data:', err);
         setError(err.message || 'Failed to load application data. Please try again.');
       } finally {
-        setLoadingPayment(false);
+        setLoading(false);
       }
     };
 
-    fetchApplicationData(appId as string);
+    fetchApplicationData(appId);
   }, [searchParams]);
 
   // const handlePayment = async () => {
@@ -54,29 +56,29 @@ export default function SummaryPage() {
 
   //   try {
   //     const paymentDetails = {
-  //       applicationId: applicationData.appId,
-  //       amount: 100, // Example amount, you might want to make this dynamic
-  //       productInfo: 'Vestiga Application Fee',
-  //       firstName: applicationData.name,
-  //       email: applicationData.email,
+  //       applicationId.appId,
+  //       amount, // Example amount, you might want to make this dynamic
+  //       productInfo'Vestiga Application Fee',
+  //       firstName.name,
+  //       email.email,
   //     };
 
   //     const response = await fetch('http://localhost:8080/api/payments/initiate', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
+  //       method'POST',
+  //       headers{
+  //         'Content-Type''application/json',
   //       },
-  //       body: JSON.stringify(paymentDetails),
+  //       body.stringify(paymentDetails),
   //     });
 
   //     if (!response.ok) {
-  //       throw new Error(`HTTP error! status: ${response.status}`);
+  //       throw new Error(`HTTP error! status${response.status}`);
   //     }
 
   //     const data = await response.json();
   //     window.location.href = data.paymentUrl; // Redirect to PayU
 
-  //   } catch (err: any) {
+  //   } catch (err) {
   //     console.error('Payment initiation failed:', err);
   //     setError(err.message || 'Failed to initiate payment. Please try again.');
   //   } finally {
@@ -138,7 +140,7 @@ export default function SummaryPage() {
           )}
           <div>
             <p className="text-sm font-medium text-gray-500">Application ID:</p>
-            <p className="text-lg font-semibold text-gray-900">{applicationData.appId}</p>
+            <p className="text-lg font-semibold text-gray-900">{applicationData._id}</p>
           </div>
           <div>
             <p className="text-sm font-medium text-gray-500">Name:</p>
@@ -165,7 +167,7 @@ export default function SummaryPage() {
             className="w-full mt-6"
             // disabled={loadingPayment}
           >
-            {/* {loadingPayment ? 'Processing Payment...' : 'Proceed to Pay with PayU'} */}
+            {/* {loadingPayment ? 'Processing Payment...' 'Proceed to Pay with PayU'} */}
             PayU integration temporarily disabled.
           </Button>
         </CardContent>

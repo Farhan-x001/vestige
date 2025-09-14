@@ -7,14 +7,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
+      {/* Hero Section */}
       <motion.section
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
         className="relative w-full h-[60vh] bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center text-white p-4"
       >
         <div className="text-center space-y-4">
-          <h1 className="text-5xl font-bold tracking-tight">Vestiga: Your Journey, Simplified.</h1>
+          <h1 className="text-5xl font-bold tracking-tight">Vestiga Journey, Simplified.</h1>
           <p className="text-xl max-w-2xl mx-auto">
             Seamless applications, secure payments, and instant confirmations. Experience the future of online interactions.
           </p>
@@ -24,10 +25,11 @@ export default function Home() {
         </div>
       </motion.section>
 
+      {/* Features Section */}
       <section className="py-16 bg-gray-50 dark:bg-gray-900">
         <div className="container mx-auto px-4 text-center">
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-4xl font-bold text-gray-800 dark:text-white mb-12"
@@ -35,6 +37,7 @@ export default function Home() {
             Features Designed for You
           </motion.h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Card 1 */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -49,6 +52,8 @@ export default function Home() {
                 </CardContent>
               </Card>
             </motion.div>
+
+            {/* Card 2 */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -63,6 +68,8 @@ export default function Home() {
                 </CardContent>
               </Card>
             </motion.div>
+
+            {/* Card 3 */}
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -81,8 +88,9 @@ export default function Home() {
         </div>
       </section>
 
+      {/* CTA Section */}
       <motion.section
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 1 }}
         className="py-20 bg-blue-700 text-white text-center"
@@ -96,6 +104,7 @@ export default function Home() {
         </div>
       </motion.section>
 
+      {/* Footer */}
       <footer className="bg-gray-800 text-white p-6 text-center">
         <div className="container mx-auto">
           <p>&copy; 2025 Vestiga. All rights reserved.</p>

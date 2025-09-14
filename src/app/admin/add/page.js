@@ -7,140 +7,78 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useEffect, useState } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner'; // Import toast
 
-interface Application {
-  id: string;
-  name: string;
-  idNumber: string;
-  address: string;
-  mobile: string;
-  email: string;
-  photo?: string;
-  paymentStatus: string;
-}
-
 const formSchema = z.object({
-  name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
-  idNumber: z.string().min(5, { message: 'ID Number must be at least 5 characters.' }),
-  address: z.string().min(10, { message: 'Address must be at least 10 characters.' }),
-  mobile: z.string().regex(/^\d{10}$/, { message: 'Mobile number must be 10 digits.' }),
-  email: z.string().email({ message: 'Invalid email address.' }),
-  photo: z.string().optional(),
-  paymentStatus: z.string().optional(),
+  name.string().min(2, { message'Name must be at least 2 characters.' }),
+  idNumber.string().min(5, { message'ID Number must be at least 5 characters.' }),
+  address.string().min(10, { message'Address must be at least 10 characters.' }),
+  mobile.string().regex(/^\d{10}$/, { message'Mobile number must be 10 digits.' }),
+  email.string().email({ message'Invalid email address.' }),
+  photo.string().optional(), // Expects Base64 string or URL
+  paymentStatus.string().optional().default('PENDING'),
 });
 
-export default function EditApplicationPage() {
+export default function AddApplicationPage() {
   const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const params = useParams();
-  const { id } = params;
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: '',
-      idNumber: '',
-      address: '',
-      mobile: '',
-      email: '',
-      photo: '',
-      paymentStatus: 'PENDING',
+    resolver(formSchema),
+    defaultValues{
+      name'',
+      idNumber'',
+      address'',
+      mobile'',
+      email'',
+      paymentStatus'PENDING',
     },
   });
 
-  useEffect(() => {
-    if (id) {
-      fetchApplicationDetails(id as string);
-    }
-  }, [id]);
-
-  const fetchApplicationDetails = async (applicationId: string) => {
-    setInitialLoading(true);
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/applications/${applicationId}`);
-      if (!response.ok) {
-        throw new Error(`Failed to fetch application details: ${response.status}`);
-      }
-      const data: Application = await response.json();
-      form.reset(data); // Pre-fill the form with fetched data
-    } catch (err: any) {
-      console.error('Error fetching application details:', err);
-      setError(err.message || 'Failed to load application details.');
-    } finally {
-      setInitialLoading(false);
-    }
-  };
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values) {
     setLoading(true);
+    console.log('Application submitted:', values);
+
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/applications/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/applications`, {
+        method'POST',
+        headers{ 'Content-Type''application/json' },
+        body.stringify(values),
       });
 
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+        throw new Error(`HTTP error! status${response.status} - ${errorText}`);
       }
 
-      const updatedApplication: Application = await response.json();
-      form.reset(updatedApplication);
-      toast.success('Application updated successfully!');
+      const appId = await response.text();
+      console.log('Application submitted:', { ...values, appId });
+      toast.success(`Application added successfully with ID${appId}`);
       router.push('/admin'); // Redirect back to admin dashboard
 
-    } catch (err: any) {
-      console.error('Error updating application:', err);
-      toast.error(err.message || 'Failed to update application. Please try again.');
+    } catch (err) { // Changed 'any' to 'unknown'
+      console.error('Error adding application:', err);
+      toast.error((err as Error).message || 'Failed to add application. Please try again.'); // Safely cast err to Error
     } finally {
       setLoading(false);
     }
   }
 
-  if (initialLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <p className="text-lg text-gray-600">Loading application details...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Card className="w-full max-w-md shadow-lg bg-red-100 border-red-400 text-red-700">
-          <CardHeader>
-            <CardTitle>Error</CardTitle>
-            <CardDescription>{error}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button onClick={() => fetchApplicationDetails(id as string)}>Retry</Button>
-            <Button variant="outline" className="ml-2" onClick={() => router.push('/admin')}>Back to Admin</Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity, y }}
+      animate={{ opacity, y }}
       transition={{ duration: 0.8 }}
       className="container mx-auto px-4 py-12"
     >
       <Card className="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-lg">
         <CardHeader>
-          <CardTitle className="text-3xl font-bold text-center text-gray-800 mb-2">Edit Application</CardTitle>
-          <CardDescription className="text-center text-gray-600 mb-6">Update the details for the application.</CardDescription>
+          <CardTitle className="text-3xl font-bold text-center text-gray-800 mb-2">Add New Application</CardTitle>
+          <CardDescription className="text-center text-gray-600 mb-6">Enter the details for the new application.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -213,7 +151,7 @@ export default function EditApplicationPage() {
               <FormField
                 control={form.control}
                 name="photo"
-                render={({ field: { value, onChange, ...fieldProps } }) => (
+                render={({ field{ onChange, ...fieldProps } }) => (
                   <FormItem>
                     <FormLabel>Photo Upload (Optional)</FormLabel>
                     <FormControl>
@@ -263,7 +201,7 @@ export default function EditApplicationPage() {
               />
 
               <Button type="submit" className="w-full" disabled={loading}>
-                {loading ? 'Updating...' : 'Update Application'}
+                {loading ? 'Adding...' 'Add Application'}
               </Button>
               <Button type="button" variant="outline" className="w-full mt-2" onClick={() => router.push('/admin')}>
                 Cancel

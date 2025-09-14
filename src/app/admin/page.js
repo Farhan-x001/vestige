@@ -10,23 +10,13 @@ import { Checkbox } from '@/components/ui/checkbox'; // Import Checkbox
 import { Input } from '@/components/ui/input'; // Import Input
 import { toast } from 'sonner'; // Corrected Import toast
 
-interface Application {
-  id: string;
-  name: string;
-  idNumber: string;
-  address: string;
-  mobile: string;
-  email: string;
-  photo?: string;
-  paymentStatus: string;
-}
 
 export default function AdminPage() {
-  const [applications, setApplications] = useState<Application[]>([]);
+  const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedApplications, setSelectedApplications] = useState<Set<string>>(new Set());
-  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [error, setError] = useState(null);
+  const [selectedApplications, setSelectedApplications] = useState(new Set());
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchApplications();
@@ -34,38 +24,39 @@ export default function AdminPage() {
 
   const fetchApplications = async () => {
     setLoading(true);
-    setError(null);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/applications`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/api/applications`);
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
       }
-      const data: Application[] = await response.json();
-      setApplications(data);
-    } catch (err: any) {
+      const result = await response.json();
+      setApplications(result.data);
+    } catch (err) {
       console.error('Error fetching applications:', err);
-      setError(err.message || 'Failed to fetch applications.');
+      setError(err.message || 'Failed to load applications.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id) => {
     if (!confirm('Are you sure you want to delete this application?')) {
       return;
     }
     setLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/applications/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/api/applications/${id}`, {
         method: 'DELETE',
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to delete application: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Failed to delete application: ${response.status}`);
       }
       toast.success('Application deleted successfully!');
       fetchApplications(); // Refresh the list
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error deleting application:', err);
       toast.error(err.message || 'Failed to delete application.');
     } finally {
@@ -73,16 +64,16 @@ export default function AdminPage() {
     }
   };
 
-  const handleSelectAll = (checked: boolean) => {
+  const handleSelectAll = (checked) => {
     if (checked) {
-      const allApplicationIds = new Set(applications.map((app) => app.id));
+      const allApplicationIds = new Set(applications.map((app) => app._id));
       setSelectedApplications(allApplicationIds);
     } else {
       setSelectedApplications(new Set());
     }
   };
 
-  const handleSelectOne = (id: string, checked: boolean) => {
+  const handleSelectOne = (id, checked) => {
     const newSelectedApplications = new Set(selectedApplications);
     if (checked) {
       newSelectedApplications.add(id);
@@ -103,21 +94,22 @@ export default function AdminPage() {
 
     setLoading(true);
     try {
-      const deletePromises = Array.from(selectedApplications).map(id =>
-        fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/applications/${id}`, {
-          method: 'DELETE',
-        }).then(response => {
-          if (!response.ok) {
-            throw new Error(`Failed to delete application ${id}: ${response.status}`);
-          }
-          return response.text();
-        })
-      );
-      await Promise.all(deletePromises);
-      toast.success(`${selectedApplications.size} applications deleted successfully!`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8080'}/api/applications/bulk`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: Array.from(selectedApplications) })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || `Failed to delete applications: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      toast.success(result.message || `${selectedApplications.size} applications deleted successfully!`);
       setSelectedApplications(new Set()); // Clear selection
       fetchApplications(); // Refresh the list
-    } catch (err: any) {
+    } catch (err) {
       console.error('Error deleting selected applications:', err);
       toast.error(err.message || 'Failed to delete selected applications.');
     } finally {
@@ -203,7 +195,7 @@ export default function AdminPage() {
                     <TableHead className="w-[50px] text-center">
                       <Checkbox
                         checked={selectedApplications.size === applications.length && applications.length > 0}
-                        onCheckedChange={(checked: boolean) => handleSelectAll(checked)}
+                        onCheckedChange={(checked) => handleSelectAll(checked)}
                         disabled={applications.length === 0}
                       />
                     </TableHead>
@@ -220,14 +212,14 @@ export default function AdminPage() {
                 </TableHeader>
                 <TableBody>
                   {filteredApplications.map((app) => (
-                    <TableRow key={app.id}>
+                    <TableRow key={app._id}>
                       <TableCell className="text-center">
                         <Checkbox
-                          checked={selectedApplications.has(app.id)}
-                          onCheckedChange={(checked: boolean) => handleSelectOne(app.id, checked)}
+                          checked={selectedApplications.has(app._id)}
+                          onCheckedChange={(checked) => handleSelectOne(app._id, checked)}
                         />
                       </TableCell>
-                      <TableCell className="font-medium text-xs">{app.id}</TableCell>
+                      <TableCell className="font-medium text-xs">{app._id}</TableCell>
                       <TableCell className="text-xs">{app.name}</TableCell>
                       <TableCell className="text-xs">{app.idNumber}</TableCell>
                       <TableCell className="text-xs">{app.address}</TableCell>
@@ -245,9 +237,9 @@ export default function AdminPage() {
                       <TableCell>
                         <div className="flex space-x-2">
                           <Button variant="outline" size="sm" asChild>
-                            <Link href={`/admin/edit/${app.id}`}>Edit</Link>
+                            <Link href={`/admin/edit/${app._id}`}>Edit</Link>
                           </Button>
-                          <Button variant="destructive" size="sm" onClick={() => handleDelete(app.id)}>
+                          <Button variant="destructive" size="sm" onClick={() => handleDelete(app._id)}>
                             Delete
                           </Button>
                         </div>
